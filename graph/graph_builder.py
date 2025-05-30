@@ -5,7 +5,8 @@ from .nodes import (
     clinical_trial_node,
     pharma_info_node,
     router,
-    start_node
+    start_node,
+    router_node
 )
 from typing import TypedDict, List, Dict, Any
 
@@ -20,7 +21,7 @@ def build_graph():
 
     # Add all nodes
     graph.add_node("start", start_node)
-    #graph.add_node("router", router)
+    graph.add_node("router_node", router_node)
     graph.add_node("small_talk", small_talk_node)
     graph.add_node("pharma_info", pharma_info_node)
     graph.add_node("clinical_trial_match", clinical_trial_node)
@@ -28,9 +29,10 @@ def build_graph():
     # Set entry point
     graph.set_entry_point("start")
 
+    graph.add_edge("start", "router_node")
     # Use conditional branching from router
     graph.add_conditional_edges(
-        "start",
+        "router_node",
         router   
     )
 
