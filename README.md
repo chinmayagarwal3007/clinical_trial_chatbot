@@ -36,14 +36,14 @@ This is an AI-powered multi-modal chatbot that helps users find relevant clinica
 
 ## 📁 Folder Structure
 
-.
-├── clinical_trials.csv # Sample trial data
-├── graph/ # LangGraph nodes and builder
-├── llm/ # Gemini-based prompt generation
-├── streamlit_app/ # Streamlit frontend app
-├── utils/ # FAISS search, embeddings
-├── main.py # CLI for testing
-└── requirements.txt # Dependencies
+
+- ├── clinical_trials.csv # Sample trial data
+- ├── graph/ # LangGraph nodes and builder
+- ├── llm/ # Gemini-based prompt generation
+- ├── streamlit_app/ # Streamlit frontend app
+- ├── utils/ # FAISS search, embeddings
+- ├── main.py # CLI for testing
+- └── requirements.txt # Dependencies
 
 ---
 
