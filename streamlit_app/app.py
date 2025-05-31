@@ -2,7 +2,6 @@ import sys
 import os
 import torch
 
-
 # Add project root (parent of this file) to sys.path
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
@@ -10,42 +9,89 @@ if ROOT_DIR not in sys.path:
 torch.classes.__path__ = [] 
 
 import streamlit as st
+import uuid
 from graph.graph_builder import build_graph
 
-# Build the LangGraph graph
+# Build LangGraph
 graph = build_graph()
-
-# Session state initialization
-if "messages" not in st.session_state:
-    st.session_state["messages"] = []
 
 st.title("💬 Clinical Trial Matcher")
 
-# Show chat history
-for msg in st.session_state["messages"]:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+# ------------------------
+# ✅ Initialize session state
+# ------------------------
+if "sessions" not in st.session_state:
+    st.session_state.sessions = {}
 
-# User input
-prompt = st.chat_input("Ask me anything about clinical trials...")
+if "current_session" not in st.session_state:
+    # Create a default session
+    default_session_id = str(uuid.uuid4())
+    st.session_state.sessions[default_session_id] = []
+    st.session_state.current_session = default_session_id
 
-if prompt:
-    # Append user message
-    st.session_state["messages"].append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
 
-    # Track previous length
+# ------------------------
+# ➕ Sidebar: New chat and session switcher
+# ------------------------
+if st.sidebar.button("➕ New Chat"):
+    new_session_id = str(uuid.uuid4())
+    st.session_state.sessions[new_session_id] = []
+    st.session_state.current_session = new_session_id
+
+
+session_ids = list(st.session_state.sessions.keys())
+if session_ids:
+    selected_session = st.sidebar.radio(
+    "Select a session:",
+    session_ids,
+    index=session_ids.index(st.session_state.current_session),
+    format_func=lambda s: f"Session {session_ids.index(s)+1}",
+    key="session_selector",  # <--- Important: separate state key
+)
+
+# Sync selected session
+if selected_session != st.session_state.current_session:
+    st.session_state.current_session = selected_session
+    st.rerun()  # <-- Force rerun immediately after switch
+
+
+
+
+# ------------------------
+# 📜 Get messages for current session
+# ------------------------
+session_id = st.session_state.current_session
+messages = st.session_state.sessions[session_id]
+
+# Display past messages
+for msg in messages:
+    if msg["role"] == "user":
+        st.chat_message("user").write(msg["content"])
+    else:
+        st.chat_message("assistant").write(msg["content"])
+
+# ------------------------
+# 💬 User input and response
+# ------------------------
+
+user_query = st.chat_input("Type your message here...")
+if user_query:
+    st.chat_message("user").write(user_query)
+    messages.append({"role": "user", "content": user_query})
+
+    # Keep last 8 messages for context
+    context_messages = messages[-8:]
+
+
+    # LangGraph state input
+    state = {"messages": context_messages}
+
+    # Run graph
+    result = graph.invoke(state)
+
+    # Get and display assistant response
+    response = result["messages"][-1]["content"]
+    messages.append({"role": "assistant", "content": response})
     
-    prev_len = len(st.session_state["messages"])
+    st.chat_message("assistant").write(response)
 
-    # Invoke the graph
-    result = graph.invoke({"messages": st.session_state["messages"]})
-    result["messages"].pop(0)
-    # Get new messages only
-    new_messages = result["messages"][prev_len:]
-    # Display and store new messages
-    for msg in new_messages:
-        if msg["role"] == "assistant":
-            with st.chat_message("assistant"):
-                st.markdown(msg["content"])
