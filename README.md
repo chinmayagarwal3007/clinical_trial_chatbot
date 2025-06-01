@@ -24,6 +24,8 @@ This is an AI-powered multi-modal chatbot that helps users find relevant clinica
 
 ### 🧠 Multi-turn Memory
 - Last 4 chat rounds (8 messages) are retained for contextual responses
+- Session-based chat UI (New Chat, View History)
+- Persistent chat history across sessions
 
 ### 📦 Modular Architecture
 - Nodes for routing, pharma info, small talk, and clinical trial search implemented using **LangGraph**
@@ -45,10 +47,4 @@ This is an AI-powered multi-modal chatbot that helps users find relevant clinica
 - ├── main.py # CLI for testing
 - └── requirements.txt # Dependencies
 
----
 
-## 🚀 Upcoming Features
-
-- Session-based chat UI (New Chat, View History)
-- PDF upload for patient information extraction
-- Persistent chat history across sessions
